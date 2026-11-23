@@ -39,7 +39,9 @@ Source : [`PLAN.md`](PLAN.md). Mettre à jour après chaque étape validée.
 
 ## Fonctionnalités additionnelles (priorité haute)
 
-- [ ] Rapport de santé batterie v0 (PDF) à partir d'une capture de Phase 0
+- [ ] Rapport d'inspection avant achat v0 (PDF) à partir d'un seul essai (Phase 0) : écrire le générateur, d'abord sur les données de la Spark
+- [ ] Décider : second CANable pour un essai unique sur Leaf 2016-2017 (requêtes + flux rapide en même temps) ?
+- [ ] Répéter le protocole d'essai avant achat à la maison (Spark), chronométrer le branchement
 - [ ] Coût de recharge : choisir où saisir les tarifs (domicile, réseaux publics)
 - [ ] Perte à l'arrêt : définir la méthode entre deux sessions
 - [ ] Alertes ntfy : sujet non devinable ou serveur auto-hébergé ; aucun GPS/VIN dans les messages

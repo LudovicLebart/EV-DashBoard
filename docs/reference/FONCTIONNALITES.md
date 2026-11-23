@@ -17,7 +17,7 @@ Liste de toutes les fonctions retenues, avec origine et phase. Source de vérit�
 
 | # | Fonction | Origine | Phase | Priorité |
 |---|----------|---------|-------|----------|
-| 1 | Rapport de santé batterie (PDF) : inspection avant achat, dossier de garantie | Concurrence (LeafSpy, rapports de revente) | v0 en 1, v1 en 4 | Haute |
+| 1 | Rapport de santé batterie (PDF) : **inspection avant achat à partir d'un seul essai**, dossier de garantie (spécification : [`RAPPORT_INSPECTION_BATTERIE.md`](RAPPORT_INSPECTION_BATTERIE.md)) | Concurrence (LeafSpy, rapports de revente) | **v0 en 0**, v1 en 4 | Haute |
 | 2 | Coût de recharge (domicile, public, au km, tarifs saisis) | Concurrence (TeslaMate) | 4 | Haute |
 | 3 | Perte à l'arrêt (énergie perdue voiture garée) | Concurrence (TeslaMate) | 2-4 | Haute |
 | 4 | Alertes ntfy (12 V, recharge terminée, dérive de cellule, charge lente) | Concurrence (EVNotify) | 4 | Haute |

@@ -2,6 +2,7 @@
 
 Entrées récentes en haut. Format : `[DATE] Décision → Conséquence`.
 
+- [2026-11-23] Objectif de la Phase 0 précisé : **rapport d'inspection de batterie détaillé à partir d'un seul essai routier, pour essayer une voiture avant de l'acheter** (imiter LeafSpy et aller plus loin) ; Spark = répétition ; rapport v0 avancé en Phase 0 ; protocole d'essai et spécification du rapport ajoutés. Commandes à distance et autres options : reportées (« on n'en est pas là »).
 - [2026-11-23] Commandes à distance (décision corrigée) : **API la plus simple et la plus sûre d'abord ; si aucune API, on peut aller sur le bus** → ordre officielle > non officielle (risques documentés) > bus CAN en dernier recours (6/14 seulement, jamais l'EV-CAN, validé sur banc) ; Tesla = API officielle ; Leaf/Spark : aucune API officielle trouvée ; jetons gardés sur le serveur.
 - [2026-11-23] Fonctionnalités additionnelles retenues : rapport de santé batterie, coût de recharge, perte à l'arrêt, alertes ntfy (priorité haute) + 13 autres conservées ; **commandes à distance** = option à débloquer (Phase 8), désactivée par défaut, exception encadrée à la doctrine lecture seule (plan §7.1, `reference/FONCTIONNALITES.md`).
 - [2026-11-23] Fonction importante ajoutée : **planification de trajets avec arrêts de recharge de x minutes**, courts et sûrs, comme une Tesla → Phase 6b (conseil seulement, marges P90, plan B, v0 à hypothèses explicites).
