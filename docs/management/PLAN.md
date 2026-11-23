@@ -77,7 +77,7 @@ Capacités visées (inchangées sur le fond, reformulées pour être mesurables)
 5. **Sentinelle 12 V** : suivi de la batterie auxiliaire et alerte avant la panne.
 6. **Planification de trajets avec arrêts de recharge** (« comme une Tesla ») : à partir d'un départ et d'une destination, proposer l'itinéraire et les arrêts de recharge, avec des arrêts de **x minutes** choisis par le conducteur, **courts et sûrs** (marge d'arrivée garantie à chaque borne). Phase 6b.
 
-**Non-objectifs par défaut** (pour ne pas dériver) : aucune écriture de configuration, aucun effacement de codes défaut, aucun pilotage du véhicule (le planificateur **conseille**, il ne commande rien), pas de service cloud public (nos propres appels à l'API officielle d'un constructeur, Phase 8, ne sont pas un service public), pas de compatibilité « toutes voitures » sans profil. **Exception encadrée : l'option « commandes à distance » (Phase 8), désactivée par défaut et à débloquer explicitement.**
+**Non-objectifs par défaut** (pour ne pas dériver) : aucune écriture de configuration, aucun effacement de codes défaut, aucun pilotage du véhicule (le planificateur **conseille**, il ne commande rien), pas de service cloud public (nos propres appels à une API de constructeur, Phase 8, ne sont pas un service public), pas de compatibilité « toutes voitures » sans profil. **Exception encadrée : l'option « commandes à distance » (Phase 8), désactivée par défaut et à débloquer explicitement.**
 
 ### 1.1 Ce que « plugger n'importe quelle voiture » veut dire concrètement
 

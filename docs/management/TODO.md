@@ -47,8 +47,8 @@ Source : [`PLAN.md`](PLAN.md). Mettre à jour après chaque étape validée.
 
 ## Option commandes à distance (Phase 8, plus tard)
 
-- [x] Voie décidée : API officielle uniquement, jamais le bus CAN (2026-11-23)
-- [ ] Décider quelles commandes ; confirmer qu'on n'a aucune commande à distance sur Leaf/Spark tant qu'aucune API officielle n'existe
+- [x] Voie décidée : API officielle > API non officielle (risques documentés) > bus CAN en dernier recours (2026-11-23)
+- [ ] Décider quelles commandes ; accord pour une API non officielle sur Leaf/Spark ?
 - [ ] Vérifier sur le tableau de bord développeur Tesla : coût, limites, signature des commandes (question ouverte 9)
 
 ## Plus tard
