@@ -19,7 +19,7 @@ Règles **non négociables**. Détail et justification : [`../management/PLAN.md
 Les règles 1 à 9 valent **tant que l'option est verrouillée, c'est-à-dire par défaut**. Si l'utilisateur la débloque (plan, Phase 8) :
 
 - le déblocage est **explicite, par véhicule et par commande** ; pas de trame libre, seulement une liste blanche de commandes revues une à une ;
-- voie privilégiée : **API officielle du constructeur** plutôt que l'écriture sur le bus CAN **[à valider selon le véhicule]** ;
+- **voie unique : API officielle du constructeur, jamais l'écriture sur le bus CAN** (décision du 2026-11-23) ; pas de bibliothèque non officielle imitant l'application du constructeur ; jetons de l'API gardés sur le serveur, droits minimaux, révocables ;
 - **jamais** : freins, direction, groupe motopropulseur, airbags, verrouillage de sécurité, mise à jour de logiciel, effacement de codes défaut ;
 - voiture à l'arrêt et en état sûr, confirmation à chaque commande, journal d'audit, limitation de fréquence, **interrupteur d'arrêt** ;
 - l'utilisateur accuse réception des risques (garantie, batterie 12 V, responsabilité).

@@ -77,7 +77,7 @@ Capacités visées (inchangées sur le fond, reformulées pour être mesurables)
 5. **Sentinelle 12 V** : suivi de la batterie auxiliaire et alerte avant la panne.
 6. **Planification de trajets avec arrêts de recharge** (« comme une Tesla ») : à partir d'un départ et d'une destination, proposer l'itinéraire et les arrêts de recharge, avec des arrêts de **x minutes** choisis par le conducteur, **courts et sûrs** (marge d'arrivée garantie à chaque borne). Phase 6b.
 
-**Non-objectifs par défaut** (pour ne pas dériver) : aucune écriture de configuration, aucun effacement de codes défaut, aucun pilotage du véhicule (le planificateur **conseille**, il ne commande rien), pas de service cloud public, pas de compatibilité « toutes voitures » sans profil. **Exception encadrée : l'option « commandes à distance » (Phase 8), désactivée par défaut et à débloquer explicitement.**
+**Non-objectifs par défaut** (pour ne pas dériver) : aucune écriture de configuration, aucun effacement de codes défaut, aucun pilotage du véhicule (le planificateur **conseille**, il ne commande rien), pas de service cloud public (nos propres appels à l'API officielle d'un constructeur, Phase 8, ne sont pas un service public), pas de compatibilité « toutes voitures » sans profil. **Exception encadrée : l'option « commandes à distance » (Phase 8), désactivée par défaut et à débloquer explicitement.**
 
 ### 1.1 Ce que « plugger n'importe quelle voiture » veut dire concrètement
 
@@ -599,7 +599,10 @@ Android : PWA + Web Bluetooth (§6.2). Quatre indicateurs : énergie restante (B
 **Principes**
 
 1. **Désactivée par défaut**, y compris dans le firmware livré : l'option s'active par un **déblocage explicite** de l'utilisateur, par véhicule et par commande (liste blanche de commandes, pas de trames libres).
-2. **Voie privilégiée : les interfaces officielles du constructeur** (API cloud, par exemple pour Tesla **[à valider]**) plutôt que l'écriture sur le bus CAN. Écrire sur le CAN d'une voiture dont on ne connaît pas toute la logique est risqué ; on ne l'envisage que pour une commande précise, documentée, testée sur banc, jamais sur un système lié à la conduite.
+2. **Décision du 2026-11-23 : on passe par l'API la plus simple et la plus sûre, jamais par l'écriture sur le bus CAN.** Concrètement : **API officielle du constructeur uniquement**. Pas d'écriture CAN, pas de bibliothèque non officielle qui imite l'application du constructeur (risque de sécurité, de conditions d'utilisation et de compte). Disponibilité par véhicule (recherche du 2026-11-23, **à confirmer**) :
+   - **Tesla (Model 3/Y)** : **API officielle « Fleet API »** avec commandes (dont préchauffage et recharge). Facturation à l'usage, avec un crédit mensuel annoncé pour usage personnel (de l'ordre de 10 $/mois, ~1 $ par 1 000 commandes selon des sources communautaires) **[communauté, à valider sur le tableau de bord développeur]** ; limites de requêtes par minute ; **les commandes récentes doivent être signées** (protocole de commande de bout en bout, proxy) **[à valider]**. C'est la **seule voie officielle trouvée** : première cible de la Phase 8.
+   - **Nissan Leaf** : **aucune API publique officielle trouvée**. Les bibliothèques existantes sont non officielles ; l'API d'origine a eu une grave faille en 2016 (Nissan l'avait alors fermée). **Pas de commande à distance Leaf tant qu'une voie officielle n'existe pas**.
+   - **Chevrolet Spark EV (2014-2016)** : pas d'API de consommateur trouvée ; une source indique que la **Spark EV 2015 ne prend pas en charge le démarrage à distance** **[communauté, à valider]**. Hors périmètre.
 3. **Jamais** : freins, direction, groupe motopropulseur, airbags, verrouillage de sécurité, mise à jour de logiciel, effacement de codes défaut.
 4. **Garde-fous** : voiture à l'arrêt et en état sûr, confirmation de l'utilisateur à chaque commande, authentification forte, limitation de fréquence, **journal d'audit** de chaque commande, **interrupteur d'arrêt** immédiat, et désactivation automatique en cas d'erreur.
 5. **Conséquences à accepter avant le déblocage** : risque pour la garantie, risque de décharger la batterie 12 V (réveil des calculateurs), responsabilité de l'utilisateur. Avertissement affiché et accusé de réception requis.
@@ -607,7 +610,9 @@ Android : PWA + Web Bluetooth (§6.2). Quatre indicateurs : énergie restante (B
 
 **Critères de sortie** : aucune émission possible tant que l'option est verrouillée (test unitaire + journal) ; une seule commande de bout en bout (par exemple le préchauffage) sur un véhicule de banc, avec journal d'audit complet, interrupteur d'arrêt testé et **aucun code défaut nouveau**.
 
-**Dépend de** : sécurité du bus validée (§5.2), enregistreur fiable (Phase 2), authentification des appareils (§3.6). Aucun développement avant que les phases de lecture soient stables.
+**Gestion des secrets** : les jetons de l'API constructeur vivent **sur le serveur** (jamais dans le dépôt, jamais dans le téléphone ni le boîtier), avec les droits (scopes) minimaux, et sont révocables d'un clic ; la PWA n'envoie qu'une demande authentifiée à notre serveur, qui applique la liste blanche, la confirmation et le journal d'audit avant d'appeler l'API.
+
+**Dépend de** : sécurité du bus validée (§5.2), serveur sécurisé (§6.1, jetons propres au projet), authentification des appareils (§3.6). Aucun développement avant que les phases de lecture soient stables. **Cette phase ne dépend plus d'un enregistreur CAN** puisqu'elle passe par une API cloud.
 
 ### 7.1 Fonctionnalités additionnelles (backlog priorisé)
 
@@ -709,7 +714,7 @@ docs/              ce plan, brochages mesurés, résultats de Phase 0
 6. **Tesla Model 3/Y** : accès réel (durée, permission d'ouvrir une console pour le connecteur de diagnostic) ? Sinon la Phase 7 les laisse de côté.
 7. **Heures par semaine** : à fixer après la Phase 0 pour valider le calendrier.
 8. **Planificateur (Phase 6b)** : durée d'arrêt cible habituelle (x), marge d'arrivée minimale souhaitée, régions de voyage (Québec seulement ? Ontario, États-Unis ?), et si un arrêt court plusieurs fois (ex. 3 × 10 min) est acceptable ou non.
-9. **Commandes à distance (Phase 8)** : quelles commandes vous intéressent (préchauffage, recharge, autre), sur quels véhicules (Leaf, Spark, Tesla), et acceptez-vous de passer par l'API du constructeur plutôt que par le bus CAN ?
+9. **Commandes à distance (Phase 8)** — *réglé en partie* : API officielle uniquement, jamais le bus CAN (décision du 2026-11-23). **Reste ouvert** : quelles commandes (préchauffage, recharge, verrouillage, autre) ; accord pour **n'avoir aucune commande à distance sur Leaf et Spark** tant qu'aucune API officielle n'existe ; accès réel à une Tesla pour tester ; acceptation du coût d'usage de l'API Tesla.
 
 ---
 

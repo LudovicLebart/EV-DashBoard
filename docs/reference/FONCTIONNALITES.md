@@ -37,7 +37,7 @@ Liste de toutes les fonctions retenues, avec origine et phase. Source de vérit�
 | # | Fonction | Statut |
 |---|----------|--------|
 | 15 | Lecture des codes défaut | Lecture seule mais **hors de la liste blanche** : décision écrite requise pour élargir (voir [`SECURITE_BUS.md`](SECURITE_BUS.md)) |
-| 16 | **Commandes à distance** (préchauffage, recharge…) | **Phase 8, option à débloquer**, désactivée par défaut ; voie privilégiée : API officielles du constructeur |
+| 16 | **Commandes à distance** (préchauffage, recharge…) | **Phase 8, option à débloquer**, désactivée par défaut ; **API officielle uniquement, jamais le bus CAN** (décision du 2026-11-23) ; **Tesla** seule voie officielle trouvée ; **Leaf et Spark : aucune API officielle trouvée, donc non prises en charge** |
 | 17 | Partage de données entre utilisateurs | Retenue, non planifiée ; cadre de vie privée requis d'abord |
 
 ## Notes de conception
