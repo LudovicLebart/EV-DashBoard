@@ -36,7 +36,7 @@
 
 | Sujet | Décision | Conséquence sur le plan |
 |-------|----------|--------------------------|
-| Affichage en conduite (iPhone/Android) | **Non décidé** | La Phase 5 (affichage) reste conditionnelle ; on construit d'abord l'historique et l'enregistreur, qui n'en dépendent pas (§6) |
+| Téléphone | **Android** | Web Bluetooth disponible (Chrome) → PWA + BLE sans coquille native ; l'USB hôte (OTG) d'Android ouvre aussi une variante « tout dans le téléphone » avec un adaptateur USB-CAN (§6.2). iOS n'est plus un cas à gérer |
 | Leaf visée | **Toutes les Leaf 2016 à 2018** (essais routiers) ; **aucune Leaf en propre pour l'instant** | Le profil Leaf reste le plus détaillé mais n'est **pas testable** avant l'accès à une voiture. 2016-2017 = AZE0 ; 2018 = ZE1 (passerelle, câble de dérivation, §4.3). Le nombre de kWh (24/30) reste à confirmer |
 | Premier besoin | **Remplacer LeafSpy** en obtenant bien plus de données lors d'un essai routier ; **GPS du téléphone** accepté ; **pas de matériel qui ne servirait qu'à cette phase** | Phase 0 = CANable + câble OBD + ordinateur + téléphone (~30-50 $) ; ESP32, SD, GNSS et boîtier permanent reportés (Phase 2) |
 | Acheter LeafSpy ou un module tout fait | **Non** : LeafSpy ne sert que pour la Leaf (et l'utilisateur n'en a pas), prix jugé trop élevé | LeafSpy Pro, OBDLink et OVMS sortent du chemin critique. **Construire** l'enregistreur (~80-110 $ le banc, §5.5) et **développer sur la Spark** |
@@ -442,11 +442,21 @@ Prix issus de recherches web : devises mélangées, stocks et délais variables,
 | API | **FastAPI** | |
 | Synchronisation | **HTTPS par morceaux, reprise par offset** (§3.6) | MQTT : inadapté aux transferts de gros fichiers ; FTP/SMB : pas d'intégrité ni de reprise propres |
 | Interface historique | **PWA React + Vite**, graphiques uPlot (séries longues) | Grafana possible en parallèle pour l'exploration, pas comme produit |
-| Affichage en conduite | **Dépend du téléphone (Q1)** : Android → PWA + **Web Bluetooth** (GATT) depuis l'origine HTTPS ; iPhone → coquille native (Capacitor) avec BLE, ou petit **écran dédié** sur le module | Wi-Fi point d'accès du module : téléphone privé d'Internet et blocage `ws://` depuis une page HTTPS (contenu mixte) ; PWA servie par le module en HTTP : pas de *service worker* (pas d'installation ni de hors-ligne) |
+| Affichage en conduite | **Android (décidé)** : PWA + **Web Bluetooth** (GATT) depuis une origine HTTPS (Chrome Android) ; écran dédié seulement si on veut un affichage fixe | Wi-Fi point d'accès du module : téléphone privé d'Internet et blocage `ws://` depuis une page HTTPS (contenu mixte) ; PWA servie par le module en HTTP : pas de *service worker* ; coquille native (Capacitor) : inutile sans iOS, sauf pour l'arrière-plan (§6.2) |
 | Modèle d'autonomie | Modèle **physique paramétrique** (aéro + roulement + pente + inertie + auxiliaires/chauffage en fonction de T) calibré par **moindres carrés régularisés** sur les trajets ; résidus éventuellement corrigés par un modèle statistique simple | Apprentissage « boîte noire » : trop peu de trajets (dizaines à centaines), non extrapolable à des températures jamais vues |
 | Dénivelé | Modèle numérique de terrain (SRTM ou données LiDAR provinciales) interrogé par position | Altitude GNSS : bruit de plusieurs mètres, dérivée inutilisable |
 
 **Construire ou acheter le module (tranché en révision 2 : construire)** : le module OVMS v3 (ESP32, 3 bus CAN, GNSS, support Leaf existant, y compris câble ZE1 vendu par la communauté) couvrirait une grande partie des Phases 2-3, mais son prix actuel est introuvable (150 $ à son lancement en 2018) et l'utilisateur a écarté l'achat pour raison de coût. On **construit un enregistreur minimal** (~80-110 $ le banc, §5.5 ; format brut maîtrisé ; passivité matérielle sur l'EV-CAN). Le transport `ovms` reste prévu dans le schéma (§2.2) si l'option est reconsidérée.
+
+### 6.2 Android : trois façons d'utiliser le téléphone
+
+| Variante | Matériel | Quand | Réserve |
+|----------|----------|-------|---------|
+| **A. Ordinateur + CANable, téléphone = GPS** | Déjà prévu | Phase 0 | Aucune appli à écrire |
+| **B. Téléphone seul + CANable en USB (OTG)** | Câble OTG (~5 $, estimation), CANable déjà acheté | Option après la Phase 0, si l'on veut se passer de l'ordinateur | Android accepte l'USB hôte ; il faut une appli native (Kotlin) ou un pont série ; **la pile ISO-TP est à écrire côté téléphone** ; tenue d'un trajet complet avec écran verrouillé à valider (service de premier plan) **[à valider]** |
+| **C. Boîtier ESP32 → téléphone en Bluetooth (PWA)** | Boîtier de la Phase 2 | Phase 5 | Web Bluetooth exige une page ouverte au premier plan ; l'enregistrement fiable reste dans le boîtier (carte SD), le téléphone ne fait qu'**afficher** |
+
+Recommandation : A pour la Phase 0, C comme cible. B seulement si l'ordinateur devient un frein réel ; elle double une partie du travail de C.
 
 ### 6.1 Hébergement sur le serveur de Guitar Hunter
 
@@ -521,7 +531,7 @@ Hypothèse de charge : **~8-10 h/semaine** (à corriger avec Q6). Durées en sem
 
 ### Phase 5 — Affichage en conduite (semaines 16-20)
 
-Selon Q1 (Web Bluetooth Android, coquille native iOS, ou écran dédié). Quatre indicateurs : énergie restante (BMS + estimation `model` quand disponible, provenance affichée), consommation instantanée traction vs auxiliaires (si `hvac_power_w` disponible, sinon masqué), écart cellulaire sous charge, marge à destination (à partir de la Phase 6).
+Android : PWA + Web Bluetooth (§6.2). Quatre indicateurs : énergie restante (BMS + estimation `model` quand disponible, provenance affichée), consommation instantanée traction vs auxiliaires (si `hvac_power_w` disponible, sinon masqué), écart cellulaire sous charge, marge à destination (à partir de la Phase 6).
 
 **Critères de sortie** : rafraîchissement ≥ 2 Hz, reconnexion automatique < 5 s après démarrage, lisible en un coup d'œil (test sur 10 trajets), aucune interaction requise en roulant.
 
@@ -599,7 +609,6 @@ docs/              ce plan, brochages mesurés, résultats de Phase 0
 
 **Encore ouvertes :**
 
-1. **Téléphone en voiture : iPhone ou Android** (ou écran dédié) — *non décidé*. Bloque seulement la Phase 5 (Web Bluetooth impossible sur iOS).
 2. **Pour chaque Leaf d'essai** : année, 24 / 30 / 40 kWh, thermopompe ou chauffage résistif ; et **ordinateur portable : Linux, Windows ou macOS ?** (Linux simplifie les requêtes batterie, §Phase 0).
 3. **Wi-Fi à l'emplacement de stationnement** : le signal domestique atteint-il la place ? (sinon : point d'accès ou synchronisation par téléphone).
 4. **Serveur de Guitar Hunter** : quelle version de Postgres, place disque disponible, peut-on y ajouter un conteneur ? (§6.1).
