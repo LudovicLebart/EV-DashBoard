@@ -1,6 +1,6 @@
 # EV-DashBoard
 
-Télémétrie de véhicules électriques, santé de la batterie et prédiction d'autonomie hivernale. Cible primaire : Nissan Leaf 2016-2018, architecture pour brancher n'importe quelle voiture par un profil.
+Télémétrie de véhicules électriques, santé de la batterie et prédiction d'autonomie hivernale. Premier véhicule d'essai : Chevrolet Spark EV ; cible primaire : Nissan Leaf 2016-2018 ; architecture pour brancher n'importe quelle voiture par un profil.
 
 **Documentation** : [`docs/`](docs/README.md) (organisation Diataxis : tutoriels, guides, référence, explication, gestion).
 

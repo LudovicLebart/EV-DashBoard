@@ -39,4 +39,4 @@ Règles :
 
 ## 5. Contrôle final
 
-Le diff ne touche que `profiles/` ; les tests des **deux** profils (le nouveau et la Leaf) passent dans la même CI.
+Le diff ne touche que `profiles/` ; les tests du nouveau profil **et** de tous les profils existants (Spark EV, Leaf…) passent dans la même CI.

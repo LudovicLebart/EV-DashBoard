@@ -6,7 +6,7 @@
 
 | Plateforme | Années | Batterie | Accès OBD |
 |------------|--------|----------|-----------|
-| AZE0 | 2013-2017 | 24 kWh, 30 kWh | 6/14 ; 12/13 (EV-CAN) **[communauté]** |
+| AZE0 | 2013-2017 | 24 kWh ; 30 kWh sur une partie des 2016 et les 2017 **[communauté, à valider par voiture]** | 6/14 ; 12/13 (EV-CAN) **[communauté]** |
 | ZE1 | 2018+ | 40 kWh et plus | Port isolé par passerelle ; 6/14 contact mis |
 
 ## Trames passives (EV-CAN, broches 12/13)
@@ -22,7 +22,7 @@
 
 ## Requêtes de diagnostic (Car-CAN, broches 6/14)
 
-Émetteur `0x79B` → batterie (LBC) `0x7BB`. Service `0x21` : *ReadDataByLocalIdentifier* hérité de **KWP2000** (non défini par UDS), transporté sur ISO-TP.
+Requêtes envoyées sur l'identifiant `0x79B` (adresse de la batterie, LBC) ; réponses du LBC sur `0x7BB`. Service `0x21` : *ReadDataByLocalIdentifier* hérité de **KWP2000** (non défini par UDS), transporté sur ISO-TP ; réponse positive `0x61` suivie du numéro de groupe. Complétion des trames à 8 octets probablement attendue **[à valider]**. Commande d'essai : tutoriel, étape 4.
 
 | Requête | Contenu supposé | Taille | Statut |
 |---------|-----------------|--------|--------|

@@ -7,7 +7,9 @@ Explication, sans manipulation. Pour agir : voir [`../tutorials/PREMIER_ESSAI_RO
 Les calculateurs d'une voiture (batterie, onduleur, tableau de bord…) communiquent sur un **bus CAN** : deux fils (CAN-H et CAN-L) partagés par tous. Chaque calculateur y envoie de petits messages, appelés **trames** :
 
 - un **identifiant** (par exemple `0x1DB`) qui dit *de quoi* parle la trame ;
-- jusqu'à **8 octets** de données.
+- jusqu'à **8 octets** de données (CAN classique ; le CAN-FD, absent des voitures visées ici, va jusqu'à 64).
+
+Chaque trame reçue correctement est **acquittée** (bit ACK) par tous les autres nœuds : un adaptateur en mode normal « parle » donc un tout petit peu même s'il n'envoie rien. Seul le mode **écoute seule** (Listen-Only) est réellement muet.
 
 Il n'y a pas de destinataire : tout le monde entend tout. Les trames **périodiques** (courant du pack, par exemple) reviennent toutes les 10 à 500 ms. Aucune n'est « demandée ».
 
@@ -22,7 +24,7 @@ Il y a deux façons d'obtenir des données :
 | Mode | Principe | Exemple |
 |------|----------|---------|
 | **Passif (écoute)** | On lit ce qui passe déjà | Courant et tension du pack, vitesse du moteur |
-| **Actif (requête)** | On envoie une question à un calculateur, il répond | Tensions des 96 groupes de cellules, SOH, Hx |
+| **Actif (requête)** | On envoie une question à un calculateur, il répond | Leaf : tensions des 96 groupes de cellules, SOH, Hx (service 0x21) ; Spark : PID du calculateur batterie (service 0x22) |
 
 Les données lourdes (les 96 tensions, environ 196 octets) ne passent pas toutes seules : elles tiennent dans plusieurs trames, d'où le protocole **ISO-TP** (voir le glossaire) qui découpe la réponse en morceaux et gère le contrôle de flux.
 
@@ -33,7 +35,7 @@ Les données lourdes (les 96 tensions, environ 196 octets) ne passent pas toutes
 La prise sous le volant donne accès à des broches fixes :
 
 - **16** : +12 V permanent ; **4 / 5** : masses ;
-- **6 / 14** : CAN-H / CAN-L du bus de diagnostic standard (500 kb/s) ;
+- **6 / 14** : CAN-H / CAN-L du bus de diagnostic standard (ISO 15765-4 : 500 kb/s le plus souvent, 250 kb/s admis) ; sur la Spark (GM), c'est le bus HS-GMLAN **[communauté, à valider]** ;
 - sur la Leaf (AZE0, 2013-2017) : **12 / 13**, un second bus (EV-CAN) qui porte le flux rapide de la batterie et du moteur **[communauté]** ; les libellés H/L de ces deux broches diffèrent selon les sources, donc **on les mesure** avant de brancher.
 
 Sur la Leaf **ZE1 (2018)**, le port OBD est isolé par une **passerelle** : le bus rapide n'y est plus accessible (il faut un câble de dérivation ailleurs dans la voiture), mais les requêtes de diagnostic passent par 6/14 contact mis **[vérifié pour la passerelle ; communauté pour les requêtes]**.
