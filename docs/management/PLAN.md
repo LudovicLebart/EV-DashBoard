@@ -599,10 +599,17 @@ Android : PWA + Web Bluetooth (§6.2). Quatre indicateurs : énergie restante (B
 **Principes**
 
 1. **Désactivée par défaut**, y compris dans le firmware livré : l'option s'active par un **déblocage explicite** de l'utilisateur, par véhicule et par commande (liste blanche de commandes, pas de trames libres).
-2. **Décision du 2026-11-23 : on passe par l'API la plus simple et la plus sûre, jamais par l'écriture sur le bus CAN.** Concrètement : **API officielle du constructeur uniquement**. Pas d'écriture CAN, pas de bibliothèque non officielle qui imite l'application du constructeur (risque de sécurité, de conditions d'utilisation et de compte). Disponibilité par véhicule (recherche du 2026-11-23, **à confirmer**) :
-   - **Tesla (Model 3/Y)** : **API officielle « Fleet API »** avec commandes (dont préchauffage et recharge). Facturation à l'usage, avec un crédit mensuel annoncé pour usage personnel (de l'ordre de 10 $/mois, ~1 $ par 1 000 commandes selon des sources communautaires) **[communauté, à valider sur le tableau de bord développeur]** ; limites de requêtes par minute ; **les commandes récentes doivent être signées** (protocole de commande de bout en bout, proxy) **[à valider]**. C'est la **seule voie officielle trouvée** : première cible de la Phase 8.
-   - **Nissan Leaf** : **aucune API publique officielle trouvée**. Les bibliothèques existantes sont non officielles ; l'API d'origine a eu une grave faille en 2016 (Nissan l'avait alors fermée). **Pas de commande à distance Leaf tant qu'une voie officielle n'existe pas**.
-   - **Chevrolet Spark EV (2014-2016)** : pas d'API de consommateur trouvée ; une source indique que la **Spark EV 2015 ne prend pas en charge le démarrage à distance** **[communauté, à valider]**. Hors périmètre.
+2. **Décision du 2026-11-23 (corrigée) : on choisit, par véhicule et par commande, la voie la plus simple et la plus sûre, dans cet ordre. Si aucune API n'existe, on peut aller sur le bus, en dernier recours.**
+   1. **API officielle du constructeur** : voie préférée.
+   2. **API non officielle** (bibliothèque qui imite l'application du constructeur) : seulement si aucune API officielle n'existe, avec **risques documentés** (conditions d'utilisation, compte, faille possible) et déblocage explicite.
+   3. **Écriture sur le bus CAN** : **dernier recours**, par commande, sous les conditions strictes ci-dessous.
+
+   **Conditions strictes de la voie 3 (bus)** : une commande précise, **documentée et reproduite d'abord sur banc**, jamais liée à la conduite (3 ci-dessous), **uniquement sur le bus de diagnostic (6/14)**, **jamais sur l'EV-CAN (12/13)**, véhicule à l'arrêt et éveillé (§5.2 règle 4), liste blanche par identifiant et contenu, revue commande par commande, matériel capable d'émettre (donc l'enregistreur de la Phase 2, pas le CANable en slcan sans réflexion §5.2). **Avertissement : pour la Leaf et la Spark, aucune commande de ce type n'est documentée ici** ; la commande de préchauffage d'origine passe par le module télématique, pas forcément par la prise OBD **[à valider]**. Il faudrait donc retrouver et valider la commande, ce qui est un vrai travail de recherche, avec risque.
+
+   Disponibilité par véhicule (recherche du 2026-11-23, **à confirmer**) :
+   - **Tesla (Model 3/Y)** : **API officielle « Fleet API »** avec commandes (dont préchauffage et recharge). Facturation à l'usage, crédit mensuel annoncé pour usage personnel (de l'ordre de 10 $/mois, ~1 $ par 1 000 commandes selon des sources communautaires) **[communauté, à valider sur le tableau de bord développeur]** ; limites de requêtes par minute ; **les commandes récentes doivent être signées** (protocole de commande de bout en bout, proxy) **[à valider]**. Voie 1 : première cible de la Phase 8.
+   - **Nissan Leaf** : **aucune API officielle trouvée**. Il existe des bibliothèques non officielles (voie 2) ; l'API d'origine a eu une grave faille en 2016 (Nissan l'avait alors fermée). Voie 3 possible seulement après validation d'une commande sur banc.
+   - **Chevrolet Spark EV (2014-2016)** : pas d'API de consommateur trouvée ; une source indique que la **Spark EV 2015 ne prend pas en charge le démarrage à distance** **[communauté, à valider]**. Voies 2 et 3 non établies.
 3. **Jamais** : freins, direction, groupe motopropulseur, airbags, verrouillage de sécurité, mise à jour de logiciel, effacement de codes défaut.
 4. **Garde-fous** : voiture à l'arrêt et en état sûr, confirmation de l'utilisateur à chaque commande, authentification forte, limitation de fréquence, **journal d'audit** de chaque commande, **interrupteur d'arrêt** immédiat, et désactivation automatique en cas d'erreur.
 5. **Conséquences à accepter avant le déblocage** : risque pour la garantie, risque de décharger la batterie 12 V (réveil des calculateurs), responsabilité de l'utilisateur. Avertissement affiché et accusé de réception requis.
@@ -612,7 +619,7 @@ Android : PWA + Web Bluetooth (§6.2). Quatre indicateurs : énergie restante (B
 
 **Gestion des secrets** : les jetons de l'API constructeur vivent **sur le serveur** (jamais dans le dépôt, jamais dans le téléphone ni le boîtier), avec les droits (scopes) minimaux, et sont révocables d'un clic ; la PWA n'envoie qu'une demande authentifiée à notre serveur, qui applique la liste blanche, la confirmation et le journal d'audit avant d'appeler l'API.
 
-**Dépend de** : sécurité du bus validée (§5.2), serveur sécurisé (§6.1, jetons propres au projet), authentification des appareils (§3.6). Aucun développement avant que les phases de lecture soient stables. **Cette phase ne dépend plus d'un enregistreur CAN** puisqu'elle passe par une API cloud.
+**Dépend de** : sécurité du bus validée (§5.2), serveur sécurisé (§6.1, jetons propres au projet), authentification des appareils (§3.6). Aucun développement avant que les phases de lecture soient stables. Les voies 1 et 2 (API) ne dépendent pas d'un enregistreur CAN ; la voie 3 (bus) exige l'enregistreur capable d'émettre (Phase 2) et une commande validée sur banc.
 
 ### 7.1 Fonctionnalités additionnelles (backlog priorisé)
 
@@ -714,7 +721,7 @@ docs/              ce plan, brochages mesurés, résultats de Phase 0
 6. **Tesla Model 3/Y** : accès réel (durée, permission d'ouvrir une console pour le connecteur de diagnostic) ? Sinon la Phase 7 les laisse de côté.
 7. **Heures par semaine** : à fixer après la Phase 0 pour valider le calendrier.
 8. **Planificateur (Phase 6b)** : durée d'arrêt cible habituelle (x), marge d'arrivée minimale souhaitée, régions de voyage (Québec seulement ? Ontario, États-Unis ?), et si un arrêt court plusieurs fois (ex. 3 × 10 min) est acceptable ou non.
-9. **Commandes à distance (Phase 8)** — *réglé en partie* : API officielle uniquement, jamais le bus CAN (décision du 2026-11-23). **Reste ouvert** : quelles commandes (préchauffage, recharge, verrouillage, autre) ; accord pour **n'avoir aucune commande à distance sur Leaf et Spark** tant qu'aucune API officielle n'existe ; accès réel à une Tesla pour tester ; acceptation du coût d'usage de l'API Tesla.
+9. **Commandes à distance (Phase 8)** — *voie décidée* : API officielle d'abord, puis API non officielle (risques documentés), puis bus CAN en dernier recours (2026-11-23). **Reste ouvert** : quelles commandes (préchauffage, recharge, verrouillage, autre) ; accord explicite pour une API non officielle (Leaf, Spark) ; accès réel à une Tesla pour tester ; acceptation du coût d'usage de l'API Tesla.
 
 ---
 
