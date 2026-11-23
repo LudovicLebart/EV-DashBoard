@@ -609,7 +609,7 @@ docs/              ce plan, brochages mesurés, résultats de Phase 0
 
 **Encore ouvertes :**
 
-2. **Pour chaque Leaf d'essai** : année, 24 / 30 / 40 kWh, thermopompe ou chauffage résistif ; et **ordinateur portable : Linux, Windows ou macOS ?** (Linux simplifie les requêtes batterie, §Phase 0).
+2. **Pour chaque Leaf d'essai** : année, 24 / 30 / 40 kWh, thermopompe ou chauffage résistif ; (ordinateur portable **double démarrage Windows + Linux** : on utilise **Linux** pour la Phase 0, qui gère l'envoi des requêtes batterie nativement ; Windows reste en secours).
 3. **Wi-Fi à l'emplacement de stationnement** : le signal domestique atteint-il la place ? (sinon : point d'accès ou synchronisation par téléphone).
 4. **Serveur de Guitar Hunter** : quelle version de Postgres, place disque disponible, peut-on y ajouter un conteneur ? (§6.1).
 5. **Spark EV** : année et possibilité d'y laisser le module plusieurs semaines (ou seulement des sessions de capture) ?
