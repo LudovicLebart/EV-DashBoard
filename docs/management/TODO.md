@@ -31,6 +31,12 @@ Source : [`PLAN.md`](PLAN.md). Mettre à jour après chaque étape validée.
 - [ ] Année de la Spark ; accès aux Tesla Model 3/Y
 - [ ] Heures par semaine (après la Phase 0)
 
+## Planificateur (Phase 6b)
+
+- [ ] Fixer x (durée d'arrêt), marge d'arrivée et régions de voyage (question ouverte 8)
+- [ ] Choisir le moteur d'itinéraire (OSRM / Valhalla / GraphHopper) et la source de bornes ; vérifier couverture, licence, fraîcheur
+- [ ] Trouver des courbes de charge publiques prudentes (Leaf, Spark) pour la v0
+
 ## Plus tard
 
-- Boîtier ESP32-C6 (Phase 2), requêtes embarquées (Phase 3), analyses batterie et sentinelle 12 V (Phase 4), affichage Android PWA + Web Bluetooth (Phase 5), modèle d'autonomie hivernale (Phase 6), preuve d'agnosticisme et ZE1 (Phase 7)
+- Boîtier ESP32-C6 (Phase 2), requêtes embarquées (Phase 3), analyses batterie et sentinelle 12 V (Phase 4), affichage Android PWA + Web Bluetooth (Phase 5), modèle d'autonomie hivernale (Phase 6), **planificateur de trajets avec arrêts de recharge de x minutes (Phase 6b ; v0 à hypothèses explicites dès la Phase 1)**, preuve d'agnosticisme et ZE1 (Phase 7)

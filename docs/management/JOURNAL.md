@@ -2,6 +2,7 @@
 
 Entrées récentes en haut. Format : `[DATE] Décision → Conséquence`.
 
+- [2026-11-23] Fonction importante ajoutée : **planification de trajets avec arrêts de recharge de x minutes**, courts et sûrs, comme une Tesla → Phase 6b (conseil seulement, marges P90, plan B, v0 à hypothèses explicites).
 - [2026-11-23] Revue de la documentation → corrections : tutoriel réécrit Spark d'abord (écoute passive → requêtes à l'arrêt → trajet ; dépannage ajouté) ; CANable : candleLight recommandé (vraie écoute seule), slcan = acquittements donc 6/14 seulement ; `candump -H` retiré (horodatage matériel, pas « absolu ») ; requêtes par une seule socket ISO-TP (script Python) au lieu de `isotpsend` seul, interface repassée hors listen-only ; `can-isotp` confirmé (Linux ≥ 5.10) ; tensions CAN et masse/terminaison précisées ; faits Spark EV sourcés (2014 A123 ~21 kWh, 2015-2016 LG 19 kWh / 192 cellules, pas de module OVMS, PID de la Bolt, en-tête 7E7 non vérifié) ; contradictions Spark/Leaf, Phase 6/7, LeafSpy/STN, prix CANable et calendrier corrigées ; PDF régénéré.
 - [2026-11-23] Première voiture d'essai : **Chevrolet Spark EV** → Phase 0 d'abord sur la Spark, puis Leaf ; PDF de synthèse (plan, Phase 0, matériel) ajouté.
 - [2026-11-23] Ordinateur portable en double démarrage Windows + Linux → **Linux** pour la Phase 0 (requêtes batterie gérées par le noyau), Windows en secours.

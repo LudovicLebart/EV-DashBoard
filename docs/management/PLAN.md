@@ -75,8 +75,9 @@ Capacités visées (inchangées sur le fond, reformulées pour être mesurables)
 3. **Autonomie hivernale** : prédire l'énergie nécessaire pour un trajet donné (température, chauffage, vitesse, dénivelé) et la marge restante.
 4. **Vieillissement long terme** : SOH, Hx, Ah, dispersion cellulaire, sessions de recharge sur plusieurs années.
 5. **Sentinelle 12 V** : suivi de la batterie auxiliaire et alerte avant la panne.
+6. **Planification de trajets avec arrêts de recharge** (« comme une Tesla ») : à partir d'un départ et d'une destination, proposer l'itinéraire et les arrêts de recharge, avec des arrêts de **x minutes** choisis par le conducteur, **courts et sûrs** (marge d'arrivée garantie à chaque borne). Phase 6b.
 
-**Non-objectifs** (pour ne pas dériver) : aucune écriture de configuration, aucun effacement de codes défaut, aucun pilotage du véhicule, pas de service cloud public, pas de compatibilité « toutes voitures » sans profil.
+**Non-objectifs** (pour ne pas dériver) : aucune écriture de configuration, aucun effacement de codes défaut, aucun pilotage du véhicule (le planificateur **conseille**, il ne commande rien), pas de service cloud public, pas de compatibilité « toutes voitures » sans profil.
 
 ### 1.1 Ce que « plugger n'importe quelle voiture » veut dire concrètement
 
@@ -549,6 +550,40 @@ Android : PWA + Web Bluetooth (§6.2). Quatre indicateurs : énergie restante (B
 
 **Critères de sortie (v1)** : sur ≥ 20 trajets d'hiver non vus pendant la calibration, erreur absolue médiane de l'énergie consommée prédite au départ ≤ 8 %, P90 ≤ 15 %, et meilleure que la base de référence « consommation moyenne des 30 derniers jours » ; erreur ≤ 5 % sur l'énergie restante à l'arrivée quand la prédiction est refaite à mi-trajet.
 
+### Phase 6b — Planificateur de trajets avec arrêts de recharge de x minutes
+
+**Besoin exprimé le 2026-11-23** : planifier un trajet avec des arrêts de recharge de **x minutes** sur le parcours, pour que les arrêts soient **sécuritaires et assez courts**, comme le planificateur de trajet d'une Tesla. Le planificateur est un **outil de conseil** : il ne commande jamais le véhicule.
+
+**Ce que fait l'utilisateur** : donne un départ, une destination, une heure ; fixe la **durée d'arrêt cible x** (par exemple 20 min, avec un minimum et un maximum) et la **marge d'arrivée minimale** ; choisit une stratégie (le plus rapide, le moins d'arrêts, le plus sûr). Le niveau de charge de départ est lu du véhicule quand il est connecté.
+
+**Ce qu'il obtient** : l'itinéraire, la liste des arrêts (borne, heure d'arrivée, niveau de charge à l'arrivée et au départ, durée), le niveau de charge prévu à l'arrivée **avec une fourchette (P90)**, et une borne de repli à chaque arrêt.
+
+**Composants** (chacun est séparable et remplaçable)
+
+1. **Routage** : moteur d'itinéraire open source auto-hébergé (OSRM, Valhalla ou GraphHopper — **[à choisir]**) avec profil d'altitude (modèle numérique de terrain, §6).
+2. **Base de bornes** : sources ouvertes (OpenStreetMap, Open Charge Map, bases gouvernementales canadiennes et américaines) **[à valider : couverture au Québec, licence, fraîcheur]**. Pour chaque borne : type de connecteur (CHAdeMO, CCS, J1772…), puissance annoncée, réseau, nombre de bornes. **La disponibilité en temps réel n'est généralement pas accessible** : on prévoit donc toujours une borne de repli.
+3. **Modèle de consommation** : celui de la Phase 6 (vitesse, pente, température, chauffage), réutilisé tel quel.
+4. **Modèle de charge** : puissance en fonction du niveau de charge et de la température du pack, **appris des sessions de recharge enregistrées** (Phase 4). Avant d'avoir des données : courbe générique **prudente** issue de sources publiques **[à valider]**. Une batterie froide accepte moins de puissance, ce qui allonge les arrêts d'hiver ; le modèle doit en tenir compte.
+5. **Optimiseur** : cherche le trajet le plus rapide (ou le plus sûr) sous contraintes : niveau de charge ≥ marge à **chaque** arrivée, durée d'arrêt proche de x, charge limitée à la zone où elle est rapide (la puissance chute vers 80 % sur beaucoup de batteries) sauf nécessité, bornes compatibles avec le connecteur du véhicule. Approche prévue : recherche de plus court chemin sur un graphe dont l'état est (borne, niveau de charge) **[à concevoir]**.
+6. **Interface** : PWA Android. Planification faite à l'arrêt ; en route, recalcul avec le niveau de charge réel (Bluetooth) ; aucune interaction en roulant (§5.4).
+
+**Règles de sécurité du planificateur**
+
+- Les marges se calculent sur le **pire cas raisonnable (P90)** de la consommation, jamais sur la moyenne ; elles augmentent par temps froid, vent ou vitesse élevée.
+- **Aucun arrêt n'est prévu sous la marge minimale**, ni à l'arrivée à la destination.
+- **Plan B à chaque arrêt** : une borne de repli atteignable avec la marge réduite si la borne prévue est occupée ou en panne.
+- Les bornes trop lentes (sous un seuil de puissance réglable) ne sont pas proposées pour un arrêt de x minutes.
+- Le plan signale clairement ce qui est **estimé et non calibré**.
+
+**Multi-véhicules** : le planificateur ne lit que le schéma canonique et des paramètres du profil (capacité utilisable, connecteurs, courbe de charge) ; brancher une autre voiture n'exige pas de le modifier. Les connecteurs diffèrent (Leaf : CHAdeMO ; Spark EV : connecteur CCS annoncé **[à valider]** ; Tesla : connecteur propre au constructeur).
+
+**Étapes**
+
+- **v0 (dès la Phase 1, sans données de voiture)** : algorithme et interface avec des hypothèses **explicites** (consommation moyenne, courbe de charge générique), affichées comme « estimation non calibrée ». Sert à valider la méthode et l'ergonomie.
+- **v1** : modèles de consommation (Phase 6) et de charge (Phase 4) calibrés sur les données du véhicule.
+
+**Critères de sortie (v1)** : sur ≥ 10 trajets longs réels (≥ 200 km) planifiés puis roulés : **100 % des arrêts respectent la marge** ; écart médian entre niveau de charge prévu et réel à l'arrivée ≤ 5 points, P90 ≤ 10 points ; durée réelle des arrêts à ±20 % de x ; aucune borne incompatible proposée. *(Cibles proposées, à confirmer.)*
+
 ### Phase 7 — Preuve d'agnosticisme et ZE1
 
 1. **Spark EV** : déjà le véhicule de banc (Phase 0). Comme le cœur logiciel est écrit en même temps que son profil, elle ne prouve pas à elle seule l'agnosticisme : la preuve porte sur le véhicule ajouté **après** elle (Leaf, puis Tesla).
@@ -580,6 +615,8 @@ Android : PWA + Web Bluetooth (§6.2). Quatre indicateurs : énergie restante (B
 | Perte de trames (FIFO TWAI, accès flash, Wi-Fi) | Trous dans les données, calculs faussés | ISR en IRAM, Wi-Fi coupé en roulant, compteur de pertes journalisé | < 0,1 % au banc à 1,5× |
 | Corruption SD / usure | Perte de trajets | Industrielle pSLC, pré-allocation, CRC par bloc, effacement seulement après accusé serveur | Coupures d'alimentation répétées au banc (100 cycles) sans perte au-delà du dernier bloc |
 | Températures extrêmes | Plantage, SD hors spécification | Composants -40/+85 °C, pas de PSRAM octale sans ECC, boîtier ASA | Fonctionnement après nuits ≤ -20 °C et habitacle chaud |
+| Planificateur trop optimiste | Arrivée à une borne sous la marge, panne d'énergie | Marges sur P90, plan B, estimation signalée « non calibrée » tant que les modèles ne sont pas validés | 100 % des arrêts au-dessus de la marge (Phase 6b) |
+| Données de bornes fausses ou périmées | Borne absente, en panne ou occupée | Sources croisées, borne de repli, réseau/connecteur vérifiés | Aucune borne incompatible proposée |
 | Horodatage faux | Corrélations faussées (météo, recharge) | Quartz 32 kHz, ancrages GNSS/NTP, `ts_quality` | ≥ 95 % d'échantillons ancrés |
 | Facteurs d'échelle/signes DBC faux | Analyses fausses en silence | Contrôles croisés (pack vs Σ cellules, GIDs vs LeafSpy, V×I vs couple×vitesse) dans les tests | Tests golden |
 | Mise à jour logicielle du véhicule change les trames | Profil cassé | Empreinte de profil dans chaque journal, alertes de plausibilité au décodage, brut conservé → redécodage | — |
@@ -597,6 +634,7 @@ Android : PWA + Web Bluetooth (§6.2). Quatre indicateurs : énergie restante (B
 ```
 firmware/          ESP-IDF : capture, EVLOG, ISO-TP, ordonnanceur, énergie, sync
 backend/           FastAPI, ingestion, décodeur, analyses, modèles
+  evdash/planner/  planificateur de trajets (routage, bornes, modèle de charge, optimiseur)
   evdash/decoder/  moteur générique (profils, DBC, ISO-TP)
 pwa/               React + Vite
 profiles/
@@ -622,6 +660,7 @@ docs/              ce plan, brochages mesurés, résultats de Phase 0
 5. **Spark EV** : année (2014 = batterie A123, 2015-2016 = LG Chem : profils différents, §4.4) et possibilité d'y laisser le module plusieurs semaines (ou seulement des sessions de capture) ?
 6. **Tesla Model 3/Y** : accès réel (durée, permission d'ouvrir une console pour le connecteur de diagnostic) ? Sinon la Phase 7 les laisse de côté.
 7. **Heures par semaine** : à fixer après la Phase 0 pour valider le calendrier.
+8. **Planificateur (Phase 6b)** : durée d'arrêt cible habituelle (x), marge d'arrivée minimale souhaitée, régions de voyage (Québec seulement ? Ontario, États-Unis ?), et si un arrêt court plusieurs fois (ex. 3 × 10 min) est acceptable ou non.
 
 ---
 
