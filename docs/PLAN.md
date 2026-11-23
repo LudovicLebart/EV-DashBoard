@@ -1,7 +1,7 @@
 # EV Dashboard — Plan de projet (révision 2)
 
 > Télémétrie véhicule électrique, santé batterie et autonomie hivernale.
-> **Cible primaire : Nissan Leaf 2016-2018** (AZE0 2016-2017 en premier ; la 2018 est une ZE1, plus difficile d'accès). **Véhicule de banc : Chevrolet Spark EV** (accès disponible, OBD-II standard). **Pas encore d'accès à une Leaf** : tout ce qui est spécifique à la Leaf est préparé sur le papier et testé dès qu'une Leaf est disponible.
+> **Cible primaire : Nissan Leaf 2016-2018** (AZE0 2016-2017 en premier ; la 2018 est une ZE1, plus difficile d'accès). **Véhicule de banc : Chevrolet Spark EV** (accès disponible, OBD-II standard). **Premier besoin : remplacer LeafSpy** lors d'essais routiers (toutes Leaf 2016-2018), avec un ordinateur, un adaptateur USB-CAN et le GPS du téléphone.
 > Architecture **véhicule-agnostique** : brancher une autre voiture = écrire un profil, pas modifier le firmware, le backend ou l'interface.
 >
 > Révision de l'ébauche « LeafSpy Maison — Télémétrie CAN & Autonomie hivernale » (9 pages). Révision 1 : 2026-11-23. **Révision 2 : 2026-11-23**, intègre les réponses de l'utilisateur (§0.0) et les prix des pièces (§5.5).
@@ -37,7 +37,8 @@
 | Sujet | Décision | Conséquence sur le plan |
 |-------|----------|--------------------------|
 | Affichage en conduite (iPhone/Android) | **Non décidé** | La Phase 5 (affichage) reste conditionnelle ; on construit d'abord l'historique et l'enregistreur, qui n'en dépendent pas (§6) |
-| Leaf visée | **2016, 2017 ou 2018** ; **aucune Leaf disponible pour l'instant** | Le profil Leaf reste le plus détaillé mais n'est **pas testable** avant l'accès à une voiture. 2016-2017 = AZE0 ; 2018 = ZE1 (passerelle, câble de dérivation, §4.3). Le nombre de kWh (24/30) reste à confirmer |
+| Leaf visée | **Toutes les Leaf 2016 à 2018** (essais routiers) ; **aucune Leaf en propre pour l'instant** | Le profil Leaf reste le plus détaillé mais n'est **pas testable** avant l'accès à une voiture. 2016-2017 = AZE0 ; 2018 = ZE1 (passerelle, câble de dérivation, §4.3). Le nombre de kWh (24/30) reste à confirmer |
+| Premier besoin | **Remplacer LeafSpy** en obtenant bien plus de données lors d'un essai routier ; **GPS du téléphone** accepté ; **pas de matériel qui ne servirait qu'à cette phase** | Phase 0 = CANable + câble OBD + ordinateur + téléphone (~30-50 $) ; ESP32, SD, GNSS et boîtier permanent reportés (Phase 2) |
 | Acheter LeafSpy ou un module tout fait | **Non** : LeafSpy ne sert que pour la Leaf (et l'utilisateur n'en a pas), prix jugé trop élevé | LeafSpy Pro, OBDLink et OVMS sortent du chemin critique. **Construire** l'enregistreur (~80-110 $ le banc, §5.5) et **développer sur la Spark** |
 | Serveur à la maison | **Le serveur de Guitar Hunter** | Il héberge l'ingestion et la base. Isolation obligatoire de l'existant (§6.1) |
 | Deuxième véhicule | **Spark EV, Tesla Model 3, Tesla Model Y** (accès potentiel) | La Spark devient le **véhicule de banc de la Phase 0**. Les deux Tesla servent à la preuve d'agnosticisme (Phase 7) ; le câble d'accès Tesla est un risque matériel (§0.1 n°8) |
@@ -424,8 +425,9 @@ Prix issus de recherches web : devises mélangées, stocks et délais variables,
 
 **Budgets estimés**
 
-- **Banc sur la Spark : ~80-110 $** (ESP32-C6, deux modules CAN, connecteur OBD, GPS bon marché, SD normale, câblage). **+ ~20-36 $** pour un CANable, conseillé pour avoir des captures de référence lisibles sur ordinateur.
-- **Version voiture pour la Leaf : ~150-250 $** (carte soignée avec puces à réveil par le bus, alimentation protégée, SD industrielle, ADC externe, boîtier). Dépend surtout de la SD industrielle et du GNSS.
+- **Banc ESP32 (Phase 2a, plus tard) : ~80-110 $** (ESP32-C6, deux modules CAN, connecteur OBD, GPS bon marché, SD normale, câblage). Le CANable de la Phase 0 est réutilisé comme outil de banc. Le GNSS du module est **facultatif** tant qu'un téléphone est présent (GPS du téléphone).
+- **Phase 0 (essai routier Leaf) : ~30-50 $** (CANable + câble OBD ; ordinateur et téléphone déjà possédés ; GPS du téléphone).
+- **Plus tard, seulement si on veut un enregistreur permanent : version voiture pour la Leaf : ~150-250 $** (carte soignée avec puces à réveil par le bus, alimentation protégée, SD industrielle, ADC externe, boîtier). Dépend surtout de la SD industrielle et du GNSS.
 - **Pas d'achat de LeafSpy Pro, d'OBDLink ni d'OVMS** dans le plan de base.
 
 ---
@@ -461,30 +463,28 @@ Le serveur existant héberge déjà une base Postgres et des services pour un au
 
 Hypothèse de charge : **~8-10 h/semaine** (à corriger avec Q6). Durées en semaines calendaires. Les pistes **A (données/logiciel)** et **B (matériel)** avancent en parallèle.
 
-### Phase 0 — Banc sur la Spark EV et collecte hivernale (semaines 1-4)
+### Phase 0 — Essai routier Leaf : remplacer LeafSpy et obtenir bien plus de données (semaines 1-3)
 
-**Pourquoi la Spark d'abord** : aucune Leaf n'est disponible, LeafSpy et OBDLink sont écartés (coût, spécifiques Leaf), et on est fin novembre : la Spark permet de commencer à enregistrer **cet hiver**, avec du matériel bon marché, et de valider toute la chaîne.
+**But** : sur chaque Leaf accessible (2016 à 2018), obtenir au moins ce que donne LeafSpy (SOH, Hx, Ah, 96 tensions de cellules, températures) **et** plus : trames brutes complètes pendant un vrai trajet, dont les pointes de courant. **Règle d'achat : rien qui ne serve qu'à cette phase** (décision de l'utilisateur).
 
-Matériel (§5.5, ~110-145 $) : ESP32-C6-DevKitC-1, deux modules CAN SN65HVD230, connecteur OBD-II mâle, CANable 2.0 (recommandé), ordinateur portable ; GPS et SD en option à ce stade. **Aucune émission sur le bus** au départ (voir la règle §5.2) : on commence par l'écoute passive sur 6/14.
+**Matériel (~30-50 $, tout réutilisé plus tard)**
 
-1. Mesurer le brochage de la Spark au multimètre (au repos : ~60 Ω entre H et L ; contact mis : H ≈ 2,5-3,5 V, L ≈ 1,5-2,5 V).
-2. Captures passives (Listen-Only) sur 6/14 : contact mis à l'arrêt, conduite, recharge, extinction puis 10 min après, une nuit complète si possible (réveils). Format candump/SavvyCAN d'abord, `EVLOG v1` dès que le firmware existe.
-3. Requêtes d'identifiants de données (0x22) vers le calculateur batterie, **une à la fois, contact mis, véhicule à l'arrêt**, à partir de listes communautaires et OVMS **[à valider]**, pour établir le profil `chevrolet/spark-ev` (§4.4). Lire seulement ; jamais d'écriture, jamais de service de session ou de sécurité.
-4. Écrire le firmware de capture minimal (journal brut + horodatage) et le faire tourner sur le banc ; rejouer les captures du CANable.
-5. Archiver toutes les captures avec un descriptif (scénario, température, SOC).
+- **Adaptateur USB-CAN CANable 2.0** (~20-36 $, §5.5) : outil de banc permanent (captures, rejeu au banc en Phase 2, Spark, Tesla).
+- **Câble ou breakout OBD-II mâle 16 broches** (~10-15 $, estimation) : sert à toutes les phases, et donne accès à 6/14 **et** 12/13.
+- Déjà possédés : ordinateur portable, téléphone (GPS). **Pas d'ESP32, de carte SD, de GNSS ni d'achat de LeafSpy/OBDLink à ce stade.**
 
-**Critères de sortie** : brochage confirmé par mesure ; table des identifiants observés avec période mesurée et charge de bus ; au moins un lot de signaux batterie de la Spark (tension, courant, SOC, éventuellement cellules) décodé et cohérent (recoupé avec l'affichage du tableau de bord) ; temps de silence du bus après extinction mesuré ; ≥ 5 trajets enregistrés ; **aucun code défaut nouveau** après les essais (relevé du tableau de bord ou d'un lecteur de codes générique).
+**Principe** : l'ordinateur enregistre les trames CAN et envoie les requêtes batterie ; le téléphone enregistre la trace GPS ; les deux fichiers se recalent après coup sur l'heure (les deux horloges sont réglées par le réseau, écart de l'ordre de la seconde **[à valider]**). Une appli téléphone viendra plus tard, avec le futur boîtier (Phase 5).
 
-### Phase 0L — Terrain Leaf (dès qu'une Leaf est accessible)
+1. Brancher le CANable sur **6/14** de la prise OBD, d'abord en **écoute seule** (Listen-Only), puis seulement quand la vue d'ensemble est comprise, envoyer les requêtes.
+2. Script Python (`python-can`, pile ISO-TP ; sous Linux avec SocketCAN, plus simple que Windows/macOS) : journal brut horodaté (format candump) **et** requêtes 21 01 / 21 02 / 21 04 (+ 21 06 **[à valider]**) vers 0x79B, réponses 0x7BB. Mêmes règles de sécurité que §5.2 : liste blanche, ≤ 10 requêtes/s, jamais bus endormi, jamais d'écriture.
+3. Trace GPS du téléphone pendant tout l'essai (appli gratuite d'enregistrement de trace, **[à choisir]**).
+4. Scénario : contact mis à l'arrêt, démarrage, conduite normale, **au moins une forte accélération**, arrêt, et si possible une recharge. Noter température extérieure, SOC affiché, odomètre.
+5. **Leaf 2016-2017 (AZE0)** : lors d'un second essai, déplacer le **même** CANable sur **12/13** en **écoute seule** (jamais d'émission) pour le flux rapide (~100 Hz) du bus moteur/batterie. Un bus par essai ; pas de second adaptateur acheté.
+6. **Leaf 2018 (ZE1)** : 6/14 seulement ; l'EV-CAN reste inaccessible au port OBD (§4.3).
+7. Décoder **hors ligne** ; comparer avec l'affichage de la voiture (SOC, tension) ; archiver journal, trace GPS et fiche de scénario.
+8. **Facultatif, si on a accès à la Spark** : même matériel, même méthode, pour entraîner la chaîne (profil `chevrolet/spark-ev`, §4.4).
 
-Peut se faire en une session avec le même matériel (CANable + séparateur OBD donnant accès à 6/14 **et** 12/13), sans acheter LeafSpy.
-
-1. Mesurer le brochage (6/14 et 12/13 ; les libellés H/L diffèrent selon les sources, §0.1 n°1).
-2. Captures passives (Listen-Only) sur les deux bus : contact mis à l'arrêt, conduite, recharge L2, extinction et 10 min après, une nuit complète.
-3. Requêtes 21 01/02/04/06 **sur 6/14** : confirmer que la passerelle route vers le LBC, mesurer la latence et la taille des réponses.
-4. **Identifier la Leaf** : année, finition, 24/30/40 kWh (le profil dépend de la plateforme AZE0 ou ZE1).
-
-**Critères de sortie** : brochage confirmé ; identifiants observés avec périodes ; 21 01/02/04 obtenus via 6/14 (ou constat contraire documenté → décision de repli §4.2) ; temps de silence mesuré. **Avant cette phase, le profil Leaf (§4.2) reste un brouillon non testé.**
+**Critères de sortie** (par Leaf testée) : réponses 21 01/02/04 obtenues via 6/14 (ou constat contraire documenté → repli §4.2) ; SOH, Hx, Ah, 96 tensions et températures décodés et plausibles ; **somme des 96 tensions vs tension pack au repos : écart ≤ 1 %** ; ≥ 1 trajet avec forte accélération capturé, trace GPS recalée ; brochage confirmé par mesure ; **aucun code défaut nouveau** (relevé du tableau de bord) ; fichiers archivés avec leur fiche.
 
 ### Phase 1 — Socle logiciel et première valeur sans matériel (semaines 2-6, piste A)
 
@@ -500,7 +500,7 @@ Peut se faire en une session avec le même matériel (CANable + séparateur OBD 
 ### Phase 2 — Enregistreur embarqué passif (semaines 3-12, piste B)
 
 - **2a (banc)** : carte ESP32-C6 + 2 transceivers + SD + GNSS + mesure 12 V ; firmware de capture et journal `EVLOG v1` ; **rejeu des captures de Phase 0 sur banc** (adaptateur USB-CAN en émetteur vers le module) au débit réel ×1,5 ; mesure de veille 48 h sur alimentation de laboratoire à 12,6 V.
-- **2b (véhicule)** : installation **d'abord dans la Spark**, puis dans la Leaf quand elle sera accessible ; synchronisation Wi-Fi, ancrages temporels.
+- **2b (véhicule)** : installation dans la Leaf (ou la Spark si c'est la seule voiture disponible) ; GNSS du module facultatif si un téléphone fournit la position ; synchronisation Wi-Fi, ancrages temporels.
 
 **Critères de sortie** : perte de trames < 0,1 % au banc à 1,5× le débit mesuré (compteur de débordement + trous dans la périodicité d'une trame périodique rapide du véhicule) ; courant de veille ≤ 0,5 mA mesuré sur 48 h ; **2 semaines sans intervention** dans la voiture avec ≥ 95 % des trajets capturés (comparaison avec l'odomètre) ; 100 % des sessions synchronisées sans action ; **aucun code défaut nouveau** (relevé du tableau de bord ou d'un lecteur de codes générique, avant/après) ; horodatage `gnss`/`ntp` sur ≥ 95 % des échantillons.
 
@@ -545,7 +545,7 @@ Selon Q1 (Web Bluetooth Android, coquille native iOS, ou écran dédié). Quatre
 
 | Période | Jalons |
 |---------|--------|
-| Déc. 2026 | Phase 0 (banc + Spark) terminée, collecte hivernale en cours ; Phase 1 avancée (historique consultable). Phase 0L dès qu'une Leaf est accessible |
+| Déc. 2026 | Phase 0 : essai(s) routier(s) Leaf, CANable + ordinateur + GPS du téléphone ; Phase 1 avancée (historique consultable) |
 | Janv.-fév. 2027 | Enregistreur embarqué dans la Spark (Phase 2b), modèle v0 (méthode) |
 | Mars-mai 2027 | Requêtes diagnostic, analyses cellulaires, sentinelle 12 V |
 | Été 2027 | Affichage en conduite, deuxième véhicule, ZE1 |
@@ -600,7 +600,7 @@ docs/              ce plan, brochages mesurés, résultats de Phase 0
 **Encore ouvertes :**
 
 1. **Téléphone en voiture : iPhone ou Android** (ou écran dédié) — *non décidé*. Bloque seulement la Phase 5 (Web Bluetooth impossible sur iOS).
-2. **Leaf précise** : 2016, 2017 ou 2018 ? 24 ou 30 kWh (2016) ; 40 kWh (2018, ZE1) ? Thermopompe ou chauffage résistif ? Et **comment y accéder** (emprunt d'une journée, achat futur, voiture d'un proche) ?
+2. **Pour chaque Leaf d'essai** : année, 24 / 30 / 40 kWh, thermopompe ou chauffage résistif ; et **ordinateur portable : Linux, Windows ou macOS ?** (Linux simplifie les requêtes batterie, §Phase 0).
 3. **Wi-Fi à l'emplacement de stationnement** : le signal domestique atteint-il la place ? (sinon : point d'accès ou synchronisation par téléphone).
 4. **Serveur de Guitar Hunter** : quelle version de Postgres, place disque disponible, peut-on y ajouter un conteneur ? (§6.1).
 5. **Spark EV** : année et possibilité d'y laisser le module plusieurs semaines (ou seulement des sessions de capture) ?
