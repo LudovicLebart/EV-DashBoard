@@ -14,6 +14,16 @@ Règles **non négociables**. Détail et justification : [`../management/PLAN.md
 8. **CAN-FD** : un contrôleur CAN classique ne doit **jamais** être en mode normal sur un bus FD (il génère des trames d'erreur) ; en écoute seule seulement.
 9. **Broches non standard (12/13, 3/11…)** : désactivées par défaut ; activées seulement par un profil qui les déclare.
 
+## Option « commandes à distance » (Phase 8) : exception encadrée
+
+Les règles 1 à 9 valent **tant que l'option est verrouillée, c'est-à-dire par défaut**. Si l'utilisateur la débloque (plan, Phase 8) :
+
+- le déblocage est **explicite, par véhicule et par commande** ; pas de trame libre, seulement une liste blanche de commandes revues une à une ;
+- voie privilégiée : **API officielle du constructeur** plutôt que l'écriture sur le bus CAN **[à valider selon le véhicule]** ;
+- **jamais** : freins, direction, groupe motopropulseur, airbags, verrouillage de sécurité, mise à jour de logiciel, effacement de codes défaut ;
+- voiture à l'arrêt et en état sûr, confirmation à chaque commande, journal d'audit, limitation de fréquence, **interrupteur d'arrêt** ;
+- l'utilisateur accuse réception des risques (garantie, batterie 12 V, responsabilité).
+
 ## Garde-fous de conduite
 
 - Aucune interaction avec l'écran en roulant ; support fixe.

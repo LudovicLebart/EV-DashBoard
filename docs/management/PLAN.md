@@ -77,7 +77,7 @@ Capacités visées (inchangées sur le fond, reformulées pour être mesurables)
 5. **Sentinelle 12 V** : suivi de la batterie auxiliaire et alerte avant la panne.
 6. **Planification de trajets avec arrêts de recharge** (« comme une Tesla ») : à partir d'un départ et d'une destination, proposer l'itinéraire et les arrêts de recharge, avec des arrêts de **x minutes** choisis par le conducteur, **courts et sûrs** (marge d'arrivée garantie à chaque borne). Phase 6b.
 
-**Non-objectifs** (pour ne pas dériver) : aucune écriture de configuration, aucun effacement de codes défaut, aucun pilotage du véhicule (le planificateur **conseille**, il ne commande rien), pas de service cloud public, pas de compatibilité « toutes voitures » sans profil.
+**Non-objectifs par défaut** (pour ne pas dériver) : aucune écriture de configuration, aucun effacement de codes défaut, aucun pilotage du véhicule (le planificateur **conseille**, il ne commande rien), pas de service cloud public, pas de compatibilité « toutes voitures » sans profil. **Exception encadrée : l'option « commandes à distance » (Phase 8), désactivée par défaut et à débloquer explicitement.**
 
 ### 1.1 Ce que « plugger n'importe quelle voiture » veut dire concrètement
 
@@ -592,6 +592,53 @@ Android : PWA + Web Bluetooth (§6.2). Quatre indicateurs : énergie restante (B
 
 **Critères de sortie** : le deuxième véhicule produit tension, courant, SOC et (si disponible) cellules dans la PWA **sans aucune modification** du firmware, du cœur backend ni de la PWA (diff limité à `profiles/`) ; les tests golden des deux profils passent dans la même CI.
 
+### Phase 8 — Option « commandes à distance » (désactivée par défaut, à débloquer)
+
+**Décision du 2026-11-23** : les commandes à distance (par exemple préchauffer l'habitacle, lancer ou arrêter une recharge) sont **intéressantes comme option à débloquer**. Elles **contredisent la doctrine « lecture seule »** du reste du projet : elles sont donc isolées, jamais actives par défaut, et ne font pas partie du chemin critique.
+
+**Principes**
+
+1. **Désactivée par défaut**, y compris dans le firmware livré : l'option s'active par un **déblocage explicite** de l'utilisateur, par véhicule et par commande (liste blanche de commandes, pas de trames libres).
+2. **Voie privilégiée : les interfaces officielles du constructeur** (API cloud, par exemple pour Tesla **[à valider]**) plutôt que l'écriture sur le bus CAN. Écrire sur le CAN d'une voiture dont on ne connaît pas toute la logique est risqué ; on ne l'envisage que pour une commande précise, documentée, testée sur banc, jamais sur un système lié à la conduite.
+3. **Jamais** : freins, direction, groupe motopropulseur, airbags, verrouillage de sécurité, mise à jour de logiciel, effacement de codes défaut.
+4. **Garde-fous** : voiture à l'arrêt et en état sûr, confirmation de l'utilisateur à chaque commande, authentification forte, limitation de fréquence, **journal d'audit** de chaque commande, **interrupteur d'arrêt** immédiat, et désactivation automatique en cas d'erreur.
+5. **Conséquences à accepter avant le déblocage** : risque pour la garantie, risque de décharger la batterie 12 V (réveil des calculateurs), responsabilité de l'utilisateur. Avertissement affiché et accusé de réception requis.
+6. Une commande n'est ajoutée à un profil qu'après revue **commande par commande** ; elle apparaît dans la liste blanche d'émission avec son bus, son identifiant et son contexte autorisé.
+
+**Critères de sortie** : aucune émission possible tant que l'option est verrouillée (test unitaire + journal) ; une seule commande de bout en bout (par exemple le préchauffage) sur un véhicule de banc, avec journal d'audit complet, interrupteur d'arrêt testé et **aucun code défaut nouveau**.
+
+**Dépend de** : sécurité du bus validée (§5.2), enregistreur fiable (Phase 2), authentification des appareils (§3.6). Aucun développement avant que les phases de lecture soient stables.
+
+### 7.1 Fonctionnalités additionnelles (backlog priorisé)
+
+Catalogue complet, avec origine et statut : [`../reference/FONCTIONNALITES.md`](../reference/FONCTIONNALITES.md). Toutes sont **retenues** ; l'ordre ci-dessous est un ordre de priorité, pas une exclusion.
+
+**Priorité haute (peu d'effort, valeur immédiate avec les données de la Phase 0 et 1)**
+
+1. **Rapport de santé batterie** (PDF) : SOH, Hx, écart entre cellules, courbes de charge, nombre de recharges rapides, plus l'inventaire des conditions de mesure. Sert d'**inspection avant achat** d'une Leaf d'occasion et de **dossier de preuve** pour la garantie de capacité **[à valider selon le pays]**. v0 dès la Phase 1 à partir d'une capture ; v1 en Phase 4 avec intervalles de confiance.
+2. **Coût de recharge** : coût par recharge et au kilomètre, domicile et public, tarifs saisis par l'utilisateur (tarif résidentiel, heures creuses, tarif au kWh ou à la minute des réseaux publics **[à valider]**). Dépend de la détection des recharges (Phase 4).
+3. **Perte à l'arrêt** : énergie perdue voiture garée, calculée à partir du dernier niveau de charge vu avant l'arrêt et du premier après, **sans enregistrement continu** pendant l'arrêt. Précision limitée par la résolution du SOC **[à valider]** ; la détection est plus fiable avec l'enregistreur embarqué (Phase 2).
+4. **Alertes ntfy** : 12 V faible, recharge terminée, cellule qui dérive, recharge anormalement lente. Réutilise le principe ntfy déjà utilisé ailleurs, avec **un sujet (topic) propre et non devinable**, ou un serveur ntfy auto-hébergé : ne jamais y mettre de position GPS ni de VIN **[à valider]**.
+
+**Priorité moyenne**
+
+5. **Décomposition de l'énergie** : traction, chauffage, auxiliaires, régénération (Phase 6).
+6. **Courbes de charge par température et type de borne** (alimente le planificateur, Phase 4 et 6b).
+7. **Détection d'anomalies** : dérive d'une cellule, charge plus lente que d'habitude, écart pack/cellules qui grandit (Phase 4).
+8. **Projection du vieillissement** avec fourchette d'incertitude (Phase 4 puis continu).
+9. **Météo le long de la route** (température, vent) dans le modèle de consommation et le planificateur (Phase 6b).
+10. **Conseil de préchauffage** branché, chiffré avec les données de chauffage (Phase 6).
+11. **Fiabilité des bornes** : journal personnel des bornes qui ont fonctionné ; alimente le choix des arrêts et des bornes de repli (Phase 6b).
+12. **Apprentissage des trajets habituels** et avertissement « assez pour l'aller-retour ? » (Phase 6b ou après).
+13. **Note de conduite après trajet** : vitesse, régénération, effet sur la consommation (Phase 6).
+14. **Comparaison entre véhicules** (Leaf, Spark, Tesla) sur un même trajet (Phase 7).
+
+**Options soumises à une décision explicite**
+
+15. **Lecture des codes défaut** : lecture seule, mais **hors de la liste blanche actuelle** (§5.2) ; à n'ajouter qu'après décision écrite d'élargir la liste.
+16. **Commandes à distance** : Phase 8, option à débloquer (voir ci-dessus).
+17. **Partage de données entre utilisateurs** (statistiques d'hiver) : à traiter **après** un cadre de vie privée explicite (GPS, VIN) ; conservé, mais pas planifié.
+
 ### Calendrier indicatif
 
 | Période | Jalons |
@@ -617,6 +664,7 @@ Android : PWA + Web Bluetooth (§6.2). Quatre indicateurs : énergie restante (B
 | Températures extrêmes | Plantage, SD hors spécification | Composants -40/+85 °C, pas de PSRAM octale sans ECC, boîtier ASA | Fonctionnement après nuits ≤ -20 °C et habitacle chaud |
 | Planificateur trop optimiste | Arrivée à une borne sous la marge, panne d'énergie | Marges sur P90, plan B, estimation signalée « non calibrée » tant que les modèles ne sont pas validés | 100 % des arrêts au-dessus de la marge (Phase 6b) |
 | Données de bornes fausses ou périmées | Borne absente, en panne ou occupée | Sources croisées, borne de repli, réseau/connecteur vérifiés | Aucune borne incompatible proposée |
+| Option commandes à distance activée par erreur ou mal conçue | Comportement imprévu du véhicule, batterie 12 V vidée, garantie | Désactivée par défaut, déblocage explicite par commande, liste blanche, journal d'audit, interrupteur d'arrêt, jamais de commande liée à la conduite (Phase 8) | Aucune émission tant que verrouillée ; zéro code défaut après essais |
 | Horodatage faux | Corrélations faussées (météo, recharge) | Quartz 32 kHz, ancrages GNSS/NTP, `ts_quality` | ≥ 95 % d'échantillons ancrés |
 | Facteurs d'échelle/signes DBC faux | Analyses fausses en silence | Contrôles croisés (pack vs Σ cellules, GIDs vs LeafSpy, V×I vs couple×vitesse) dans les tests | Tests golden |
 | Mise à jour logicielle du véhicule change les trames | Profil cassé | Empreinte de profil dans chaque journal, alertes de plausibilité au décodage, brut conservé → redécodage | — |
@@ -661,6 +709,7 @@ docs/              ce plan, brochages mesurés, résultats de Phase 0
 6. **Tesla Model 3/Y** : accès réel (durée, permission d'ouvrir une console pour le connecteur de diagnostic) ? Sinon la Phase 7 les laisse de côté.
 7. **Heures par semaine** : à fixer après la Phase 0 pour valider le calendrier.
 8. **Planificateur (Phase 6b)** : durée d'arrêt cible habituelle (x), marge d'arrivée minimale souhaitée, régions de voyage (Québec seulement ? Ontario, États-Unis ?), et si un arrêt court plusieurs fois (ex. 3 × 10 min) est acceptable ou non.
+9. **Commandes à distance (Phase 8)** : quelles commandes vous intéressent (préchauffage, recharge, autre), sur quels véhicules (Leaf, Spark, Tesla), et acceptez-vous de passer par l'API du constructeur plutôt que par le bus CAN ?
 
 ---
 

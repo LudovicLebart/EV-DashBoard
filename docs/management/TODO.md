@@ -37,6 +37,18 @@ Source : [`PLAN.md`](PLAN.md). Mettre à jour après chaque étape validée.
 - [ ] Choisir le moteur d'itinéraire (OSRM / Valhalla / GraphHopper) et la source de bornes ; vérifier couverture, licence, fraîcheur
 - [ ] Trouver des courbes de charge publiques prudentes (Leaf, Spark) pour la v0
 
+## Fonctionnalités additionnelles (priorité haute)
+
+- [ ] Rapport de santé batterie v0 (PDF) à partir d'une capture de Phase 0
+- [ ] Coût de recharge : choisir où saisir les tarifs (domicile, réseaux publics)
+- [ ] Perte à l'arrêt : définir la méthode entre deux sessions
+- [ ] Alertes ntfy : sujet non devinable ou serveur auto-hébergé ; aucun GPS/VIN dans les messages
+- [ ] Catalogue complet : [`../reference/FONCTIONNALITES.md`](../reference/FONCTIONNALITES.md)
+
+## Option commandes à distance (Phase 8, plus tard)
+
+- [ ] Décider quelles commandes, sur quels véhicules, via API constructeur ou bus (question ouverte 9)
+
 ## Plus tard
 
 - Boîtier ESP32-C6 (Phase 2), requêtes embarquées (Phase 3), analyses batterie et sentinelle 12 V (Phase 4), affichage Android PWA + Web Bluetooth (Phase 5), modèle d'autonomie hivernale (Phase 6), **planificateur de trajets avec arrêts de recharge de x minutes (Phase 6b ; v0 à hypothèses explicites dès la Phase 1)**, preuve d'agnosticisme et ZE1 (Phase 7)

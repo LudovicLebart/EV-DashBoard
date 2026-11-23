@@ -6,7 +6,7 @@ Organisation **Diataxis** : on cherche selon ce qu'on veut faire, pas selon le s
 |----------|---------|---------|
 | **Apprendre** en le faisant | [`tutorials/`](tutorials/) | Pas à pas guidés pour un premier résultat |
 | **Faire** une tâche précise | [`how-to/`](how-to/) | Recettes courtes, orientées but |
-| **Consulter** un fait exact | [`reference/`](reference/) | Schéma de données, règles de sécurité, trames Leaf, glossaire |
+| **Consulter** un fait exact | [`reference/`](reference/) | Schéma de données, règles de sécurité, trames Leaf, catalogue des fonctionnalités, glossaire |
 | **Comprendre** pourquoi | [`explanation/`](explanation/) | Comment fonctionne le CAN/OBD, choix d'architecture |
 | **Suivre** le projet | [`management/`](management/) | Plan, TODO, journal |
 
