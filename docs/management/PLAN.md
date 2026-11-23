@@ -473,7 +473,9 @@ Le serveur existant héberge déjà une base Postgres et des services pour un au
 
 Hypothèse de charge : **~8-10 h/semaine** (à corriger avec Q6). Durées en semaines calendaires. Les pistes **A (données/logiciel)** et **B (matériel)** avancent en parallèle.
 
-### Phase 0 — Essai routier Leaf : remplacer LeafSpy et obtenir bien plus de données (semaines 1-3)
+### Phase 0 — Essai routier : Spark EV d'abord, puis Leaf (remplacer LeafSpy, obtenir bien plus de données) (semaines 1-3)
+
+**Décision du 2026-11-23 : la première voiture d'essai est la Chevrolet Spark EV** (accès disponible, OBD-II standard sur 6/14, sans passerelle isolante connue **[à valider]**). Les étapes ci-dessous s'appliquent d'abord à la Spark (profil `chevrolet/spark-ev`, §4.4 ; les requêtes batterie utilisent les listes communautaires de PID de la Spark **[à valider]**, pas les requêtes Leaf 21 01/02/04), puis à chaque Leaf accessible. Version imprimable : `EV_Dashboard_Plan_Phase0_Materiel.pdf`.
 
 **But** : sur chaque Leaf accessible (2016 à 2018), obtenir au moins ce que donne LeafSpy (SOH, Hx, Ah, 96 tensions de cellules, températures) **et** plus : trames brutes complètes pendant un vrai trajet, dont les pointes de courant. **Règle d'achat : rien qui ne serve qu'à cette phase** (décision de l'utilisateur).
 

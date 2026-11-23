@@ -1,4 +1,6 @@
-# Tutoriel — Premier essai routier avec une Leaf (Phase 0)
+# Tutoriel — Premier essai routier (Phase 0)
+
+> **Première voiture : Chevrolet Spark EV** (décision du 2026-11-23). Les étapes 1 à 5 et 7-8 valent pour la Spark ; l'étape 6 (requêtes `21 01/02/04` vers `0x79B`) est **spécifique à la Leaf** : sur la Spark, on utilise les PID de la liste communautaire de la Spark **[à valider]**. Les sections « Leaf » s'appliquent à l'essai suivant.
 
 **But** : enregistrer les données d'une Leaf pendant un trajet, avec un ordinateur portable sous **Linux**, un adaptateur **CANable** et le **GPS du téléphone**, et obtenir de quoi remplacer LeafSpy.
 

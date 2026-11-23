@@ -2,6 +2,7 @@
 
 Entrées récentes en haut. Format : `[DATE] Décision → Conséquence`.
 
+- [2026-11-23] Première voiture d'essai : **Chevrolet Spark EV** → Phase 0 d'abord sur la Spark, puis Leaf ; PDF de synthèse (plan, Phase 0, matériel) ajouté.
 - [2026-11-23] Ordinateur portable en double démarrage Windows + Linux → **Linux** pour la Phase 0 (requêtes batterie gérées par le noyau), Windows en secours.
 - [2026-11-23] Téléphone **Android** → PWA + Web Bluetooth ; variantes d'usage du téléphone décrites (plan §6.2).
 - [2026-11-23] Premier besoin : remplacer LeafSpy par un essai routier ; GPS du téléphone accepté ; pas de matériel qui ne servirait qu'à la Phase 0 → CANable + câble OBD + ordinateur (~30-50 $) ; ESP32, SD, GNSS reportés.

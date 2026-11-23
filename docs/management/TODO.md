@@ -2,12 +2,14 @@
 
 Source : [`PLAN.md`](PLAN.md). Mettre à jour après chaque étape validée.
 
-## Phase 0 — Essai routier Leaf (~30-50 $)
+## Phase 0 — Essai routier : Spark EV puis Leaf (~30-50 $)
 
 - [ ] Acheter le CANable 2.0 (~20-36 $) et un câble/breakout OBD-II mâle 16 broches (~10-15 $)
 - [ ] Préparer l'ordinateur Linux (`can-utils`, noyau `can-isotp`) ; vérifier le micrologiciel du CANable (candleLight ou slcan)
 - [ ] Choisir une appli de trace GPS Android
-- [ ] Obtenir l'accès à une Leaf (2016-2018) pour un essai
+- [ ] **Premier essai sur la Spark EV** : confirmer l'année et la durée d'accès
+- [ ] Trouver les listes communautaires de PID batterie de la Spark (sources à vérifier)
+- [ ] Obtenir ensuite l'accès à une Leaf (2016-2018) pour un essai
 - [ ] Mesurer le brochage ; capturer en écoute seule ; trajet avec forte accélération
 - [ ] Requêtes `21 01/02/04` via 6/14 ; noter si la passerelle les route
 - [ ] Décoder hors ligne et vérifier (somme des 96 tensions, signe du courant)
